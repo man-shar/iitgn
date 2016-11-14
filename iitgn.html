@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<head>
+	<script type="text/javascript" src="d3.js"></script>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<style type="text/css">
+body{
+	text-align: center;
+}
+
+
+path.line {
+	fill: none;
+	stroke: #666;
+	stroke-width: 1.5px;
+}
+.viz{
+	text-align: center;
+}
+.viz svg{
+	text-align: center;
+	padding-top: 30px;
+}
+g{
+	text-align: center;
+}
+path.area {
+	fill: #e7e7e7;
+}
+.tooltip {
+	color: #222;
+	background-color: #fff;
+	padding: .5em;
+	border:1px solid rgba(0,0,0,0.5);
+	text-shadow: #f5f5f5 0 1px 0;
+	border-radius: 2px;
+
+	position: absolute;
+	white-space: pre;
+
+	box-shadow: 2px 2px 2px rgba(169,169,169,0.5);
+	
+}
+.axis {
+	shape-rendering: crispEdges;
+}
+
+.x.axis line {
+	stroke: #fff;
+}
+
+.x.axis .minor {
+	stroke-opacity: .5;
+}
+
+.x.axis path {
+	display: none;
+}
+.x.axis text{
+
+}
+.y.axis line,
+.y.axis path {
+	fill: none;
+	stroke: #000;
+}
+.buttons{
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+.legend{
+	width:70px;
+	height: 20px;
+	text-align: center;	
+	display: inline-block;
+
+}
+</style>
+<body>
+	<div class="buttons category">
+		<button type="button" class="btn btn-default" id="0">Overall</button>
+		<button type="button" class="btn btn-default" id="1">CEOs</button>
+		<button type="button" class="btn btn-default" id="2">Government Officers</button>
+		<button type="button" class="btn btn-default" id="3">Professors and Teachers</button>
+		<button type="button" class="btn btn-default" id="4">Middle Management</button>
+
+		<button type="button" class="btn btn-default" id="5">Northern</button>
+		<button type="button" class="btn btn-default" id="6">Southern</button>
+		<button type="button" class="btn btn-default" id="7">Eastern</button>
+		<button type="button" class="btn btn-default" id="8">Western</button>
+	</div>
+	
+	<div class="legend">
+		<svg class="legendsvg" width="200px" height="60px">
+			<g>
+				<rect width="20px" height="20px" style="fill:#8dd3c7;" x="0" y="0"></rect>
+				<text x="30" y="18">India's standing</text>
+				<rect width="20px" height="20px" style="fill:#ffffb3;" x="0" y="30"></rect>				
+				<text x="30" y="48" >Importance rating</text>
+			</g>
+			
+		</svg>
+	
+</div>
+
+	<div class="viz">
+	</div>
+</body>
+<script type="text/javascript">
+names={
+	"C":"Conscientousness",
+	"P":"Perseverance",
+	"I":"Innovativeness",
+	"TI":"Taking Initiative",
+	"PSS":"Problem Solving Skills",
+	"AHS":"Sense of Responsibility",
+	"ATD":"Attention To Details",
+	"CT":"Creative Thinking",
+	"TP":"Team Player",
+	"LOT":"Level of Trust",
+	"HW":"Hard Work",
+	"ITS":"Independent Thinking Skills",
+};
+
+d3.selectAll(".btn").on("click",function(){butt_press(this.getAttribute("id"));});
+function butt_press(id){
+	d3.select(".viz").selectAll("svg").remove();
+	id=id;
+	////debugger;
+	data=[];
+	d3.csv("combined.csv",function (d){
+		data=d;
+			//////debugger;
+			var svg=d3.select(".viz").append("svg").attr("width",1000).attr("height",300);
+
+			var chart=svg.append("g").attr("width",450).attr("height",250).attr("id","chart").attr("transform","translate(30,10)");
+			var tooltip=d3.select(".viz").append("g").attr("class","tooltip");
+			tooltip.append("text").attr("class","tooltext");
+			var yscale=d3.scaleLinear().domain([0,100]).range([250,0]);
+			var percentage=d3.scaleLinear().domain([0,100]).range([0,250]);
+			var yaxis=d3.axisLeft(yscale);
+			chart.append("g").call(yaxis);
+			////debugger;
+			curr_data=data[+id];
+			c=0;
+			padding=2;
+			thinnnnnnnnner_width=31;
+			for (key in curr_data)
+			{
+				elem=curr_data[key];
+				if(elem!="NA")
+				{
+					num=elem.split(":");
+					if (!isNaN(num[0])){
+						//if (isNaN(num[1])) debugger;
+						chart.append("rect").attr("id",names[key]).attr("width",30).attr("height",function (){
+							return percentage(+num[0]);
+						})
+						.style("fill","#8dd3c7")
+						.attr("x",+(thinnnnnnnnner_width*c+padding)).attr("y",(yscale(+num[0])))
+						.on("mouseover",function(d){
+							//debugger;
+							d3.select(this).style("fill","red");
+							d3.select(".tooltext").text(d3.select(this).attr("id")+" : "+d3.format(percentage.invert(+d3.select(this).attr("height")),".2f")+"%");
+							var coordinates = [0, 0];
+							coordinates = d3.mouse(this);
+							//debugger;
+							var x = +d3.select(this).attr("x");
+							var offset=+d3.select(this).attr("width")/2;
+							var y = +d3.select(this).attr("height");
+							//debugger;
+							//debugger;
+							//d3.select(".tooltip").attr("left",x+offset).attr("top",250-y).style("opacity",1);
+							var mouse=d3.mouse(this);
+							d3.select(".tooltip").attr("style","opacity:"+1+";left:" + (d3.event.pageX -20) +
+								'px; top:' + (d3.event.pageY - 40) + 'px');
+							//debugger;
+						})
+						.on("mouseout",function(){
+							d3.select(this).style("fill","#8dd3c7");
+							d3.select(".tooltip").style("opacity",0);
+						})
+						.on("mousemove",function(){
+							var mouse=d3.mouse(this);
+							d3.select(".tooltip").attr("style","opacity:"+1+";left:" + (d3.event.pageX -20) +
+								'px; top:' + (d3.event.pageY - 40) + 'px');
+						});
+
+						c++;
+
+						chart.append("rect").attr("id",names[key]).attr("width",30).attr("height",function (){
+							return percentage(+num[1]);
+						})
+						.style("fill","#ffffb3")
+						.attr("x",+(thinnnnnnnnner_width*c+padding)).attr("y",(yscale(+num[1])))
+						.on("mouseover",function(d){
+							//debugger;
+							d3.select(this).style("fill","red");
+							d3.select(".tooltext").text(d3.select(this).attr("id")+" : "+d3.format(percentage.invert(+d3.select(this).attr("height")),".2f")+"%");
+							var coordinates = [0, 0];
+							coordinates = d3.mouse(this);
+							var x = +d3.select(this).attr("x");
+							var offset=+d3.select(this).attr("width")/2;
+							var y = +d3.select(this).attr("height");
+							//debugger;
+							//d3.select(".tooltip").attr("left",x+offset).attr("top",250-y).style("opacity",1);
+							//debugger;
+							var mouse=d3.mouse(this);
+							d3.select(".tooltip").attr("style","opacity:"+1+";left:" + (d3.event.pageX -20) +
+								'px; top:' + (d3.event.pageY - 40) + 'px');
+						})
+						.on("mouseout",function(){
+							d3.select(this).style("fill","#ffffb3");
+							d3.select(".tooltip").style("opacity",0);
+						})
+						.on("mousemove",function(){
+							var mouse=d3.mouse(this);
+							d3.select(".tooltip").attr("style","opacity:"+1+";left:" + (d3.event.pageX -20) +
+								'px; top:' + (d3.event.pageY - 40) + 'px');
+						});
+						c++;
+					}
+				}
+			}
+		});
+}
+</script>
+
