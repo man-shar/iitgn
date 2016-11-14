@@ -162,7 +162,7 @@ function butt_press(id){
 						.on("mouseover",function(d){
 							//debugger;
 							d3.select(this).style("fill","red");
-							d3.select(".tooltext").text(d3.select(this).attr("id")+" : "+d3.format(percentage.invert(+d3.select(this).attr("height")),".2f")+"%");
+							d3.select(".tooltext").text(d3.select(this).attr("id")+" : "+percentage.invert(+d3.select(this).attr("height")).toPrecision(4)+"%");
 							var coordinates = [0, 0];
 							coordinates = d3.mouse(this);
 							//debugger;
@@ -197,7 +197,7 @@ function butt_press(id){
 						.on("mouseover",function(d){
 							//debugger;
 							d3.select(this).style("fill","red");
-							d3.select(".tooltext").text(d3.select(this).attr("id")+" : "+d3.format(percentage.invert(+d3.select(this).attr("height")),".2f")+"%");
+							d3.select(".tooltext").text(d3.select(this).attr("id")+" : "+percentage.invert(+d3.select(this).attr("height")).toPrecision(4)+"%");
 							var coordinates = [0, 0];
 							coordinates = d3.mouse(this);
 							var x = +d3.select(this).attr("x");
